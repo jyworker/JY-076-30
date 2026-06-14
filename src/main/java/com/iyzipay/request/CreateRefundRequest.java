@@ -14,6 +14,7 @@ public class CreateRefundRequest extends Request {
     private String currency;
     private RefundReason reason;
     private String description;
+    private String idempotencyKey;
 
     public String getPaymentTransactionId() {
         return paymentTransactionId;
@@ -63,6 +64,14 @@ public class CreateRefundRequest extends Request {
         this.description = description;
     }
 
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
     @Override
     public String toString() {
         return new ToStringRequestBuilder(this)
@@ -73,6 +82,7 @@ public class CreateRefundRequest extends Request {
                 .append("currency", currency)
                 .append("reason", reason)
                 .append("description", description)
+                .append("idempotencyKey", idempotencyKey)
                 .toString();
     }
 }

@@ -10,6 +10,7 @@ public class CreateRefundV2Request extends Request {
     private String paymentId;
     private BigDecimal price;
     private String ip;
+    private String idempotencyKey;
 
 
     public String getPaymentId() {
@@ -36,6 +37,14 @@ public class CreateRefundV2Request extends Request {
         this.ip = ip;
     }
 
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
     @Override
     public String toString() {
         return new ToStringRequestBuilder(this)
@@ -43,6 +52,7 @@ public class CreateRefundV2Request extends Request {
                 .append("paymentId", paymentId)
                 .append("price", price)
                 .append("ip", ip)
+                .append("idempotencyKey", idempotencyKey)
                 .toString();
     }
 }

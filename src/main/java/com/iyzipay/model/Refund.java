@@ -2,16 +2,20 @@ package com.iyzipay.model;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Map;
 
 import com.iyzipay.HashValidator;
 import com.iyzipay.HttpClient;
 import com.iyzipay.IyzipayResource;
 import com.iyzipay.Options;
 import com.iyzipay.ResponseSignatureGenerator;
+import com.iyzipay.idempotency.RefundIdempotentExecutor;
 import com.iyzipay.request.CreateRefundRequest;
 import com.iyzipay.request.CreateRefundV2Request;
 
 public class Refund extends IyzipayResource implements ResponseSignatureGenerator {
+
+    private static final String IDEMPOTENCY_KEY_HEADER = "x-iyzi-idempotency-key";
 
     private String paymentId;
     private String paymentTransactionId;
@@ -25,20 +29,38 @@ public class Refund extends IyzipayResource implements ResponseSignatureGenerato
 
     public static Refund create(CreateRefundRequest request, Options options) {
         String path = "/payment/refund";
+        Map<String, String> headers = getHttpHeadersV2(path, request, options);
+        addIdempotencyHeader(headers, request.getIdempotencyKey());
         return HttpClient.create().post(options.getBaseUrl() + path,
                 getHttpProxy(options),
-                getHttpHeadersV2(path, request, options),
+                headers,
                 request,
                 Refund.class);
     }
 
     public static Refund createV2(CreateRefundV2Request request, Options options) {
         String path = "/v2/payment/refund";
+        Map<String, String> headers = getHttpHeadersV2(path, request, options);
+        addIdempotencyHeader(headers, request.getIdempotencyKey());
         return HttpClient.create().post(options.getBaseUrl() + path,
                 getHttpProxy(options),
-                getHttpHeadersV2(path, request, options),
+                headers,
                 request,
                 Refund.class);
+    }
+
+    private static void addIdempotencyHeader(Map<String, String> headers, String idempotencyKey) {
+        if (idempotencyKey != null && !idempotencyKey.isEmpty()) {
+            headers.put(IDEMPOTENCY_KEY_HEADER, idempotencyKey);
+        }
+    }
+
+    public static Refund createIdempotent(CreateRefundRequest request, Options options) {
+        return RefundIdempotentExecutor.getInstance().executeRefundV1(request, options);
+    }
+
+    public static Refund createV2Idempotent(CreateRefundV2Request request, Options options) {
+        return RefundIdempotentExecutor.getInstance().executeRefundV2(request, options);
     }
 
     public boolean verifySignature(String secretKey) {
